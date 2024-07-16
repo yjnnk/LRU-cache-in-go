@@ -2,25 +2,37 @@ package main
 
 type LRUCache struct {
 	capacity int
-	cache: map[string]*Node
+	cache    map[string]*Node
+	head     *Node
+	tail     *Node
 }
 
-
 type Node struct {
-
+	key   string
+	value interface{}
+	next  *Node
+	prev  *Node
 }
 
 func NewLRUCache(capacity int) *LRUCache {
 	return &LRUCache{
 		capacity: capacity,
-		cache: map[string]*Node,
+		cache:    make(map[string]*Node),
 	}
 }
 
-func (lrucCache LRUCache) Get(key string) interface{} {
-	//to do
+func (lru LRUCache) moveToHead(node *Node) {
+	
+}
 
-	return lrucCache.capacity + 1
+func (lrucCache LRUCache) Get(key string) interface{} {
+
+	if node, exists := lrucCache.cache[key]; exists {
+		// deve se tornar a nova cabeça
+		lrucCache.moveToHead(node)
+		return node.value
+	}
+	return -1
 }
 
 func (lrucCache LRUCache) Set(key string) interface{} {
