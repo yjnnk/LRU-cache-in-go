@@ -21,9 +21,7 @@ func NewLRUCache(capacity int) *LRUCache {
 	}
 }
 
-func (lru *LRUCache) moveToHead(node *Node) {
-
-	//remover nó: tirá-lo da lista
+func (lru *LRUCache) removeNode(node *Node) {
 	if node.prev != nil {
 		node.prev.next = node.next
 	} else {
@@ -35,8 +33,9 @@ func (lru *LRUCache) moveToHead(node *Node) {
 	} else {
 		lru.tail = node.prev
 	}
+}
 
-	//adicionar nó: adicioná-lo à lista
+func (lru *LRUCache) addNode(node *Node) {
 	node.prev = nil
 	node.next = lru.head
 
@@ -50,6 +49,15 @@ func (lru *LRUCache) moveToHead(node *Node) {
 	}
 }
 
+func (lru *LRUCache) moveToHead(node *Node) {
+
+	//remover nó: tirá-lo da lista
+	lru.removeNode(node)
+
+	//adicionar nó: adicioná-lo à lista
+	lru.addNode(node)
+}
+
 func (lrucCache *LRUCache) Get(key string) interface{} {
 
 	if node, exists := lrucCache.cache[key]; exists {
@@ -59,14 +67,50 @@ func (lrucCache *LRUCache) Get(key string) interface{} {
 	return -1
 }
 
+func (c *LRUCache) removeTail() *Node {
+	if c.tail == nil {
+		return nil
+	}
+	node := c.tail
+	c.removeNode(node)
+	return node
+}
+
 func (lru *LRUCache) Set(key string, value interface{}) interface{} {
 
-	return lru.capacity + 1
+	if node, found := lru.cache[key]; found {
+		node.value = value
+		lru.moveToHead(node)
+		return nil
+	}
+
+	newNode := &Node{
+		key:   key,
+		value: value,
+	}
+
+	lru.cache[key] = newNode
+
+	newNode.prev = nil
+	newNode.next = lru.head
+
+	if lru.head != nil {
+		lru.head.prev = newNode
+	}
+	lru.head = newNode
+
+	if lru.tail == nil {
+		lru.tail = newNode
+	}
+
+	if len(lru.cache) > lru.capacity {
+		tail := lru.removeTail()
+		delete(lru.cache, tail.key)
+	}
+
+	return nil
 }
 
 func main() {
-	// oi := NewLRUCache(5)
-
-	// fmt.Println(oi.Get())
-
+	// cac := NewLRUCache(5)
 }
